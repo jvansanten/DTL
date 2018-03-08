@@ -35,7 +35,7 @@
 			{
 			private:
 
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 				int m_sock;
 				static constexpr int waitFor_size = FD_SETSIZE;
 #elif _WIN32

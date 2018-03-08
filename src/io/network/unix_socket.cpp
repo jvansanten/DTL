@@ -8,7 +8,7 @@
  * 	of the LGPL license. See the LICENSE file for details.
  */
 
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 
 #include "io/network/socket.h"
 
@@ -26,7 +26,7 @@
 		namespace network
 		{
 			Socket::Socket()
-					: m_sock(-1)
+					: m_sock(0)
 			{
 
 				memset(&m_addr, 0, sizeof(m_addr));
@@ -62,8 +62,11 @@
 				int on = 1;
 				if (setsockopt(m_sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &on, sizeof(on)) == -1)
 					return false;
-				else
-					return true;
+#if defined(SO_NOSIGPIPE)
+				if (setsockopt(m_sock, SOL_SOCKET, SO_NOSIGPIPE, (const char*) &on, sizeof(on)) == -1)
+					return false;
+#endif
+				return true;
 			}
 
 			bool Socket::close()
@@ -129,7 +132,12 @@
 
 			bool Socket::send(const u_int8_t* const p_data, unsigned int p_length)
 			{
-				int status = ::send(m_sock, p_data, p_length, MSG_NOSIGNAL);
+#if defined(MSG_NOSIGNAL)
+				int flags = MSG_NOSIGNAL;
+#else
+				int flags = 0;
+#endif
+				int status = ::send(m_sock, p_data, p_length, flags);
 				if (status == -1)
 				{
 					return false;
