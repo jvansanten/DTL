@@ -260,8 +260,8 @@
 				if (p_timeout_us != 0)
 				{
 					timeval time;
-					time.tv_sec = 0;
-					time.tv_usec = p_timeout_us;
+					time.tv_sec = p_timeout_us/1000000;
+					time.tv_usec = p_timeout_us%1000000;
 
 					rc = ::select(maxfds + 1, &set, (fd_set*) NULL, (fd_set*) NULL, &time);	/// Returns number of avaible sockets
 				}
